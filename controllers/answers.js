@@ -44,6 +44,10 @@ const AnswerController = (app) => {
 
     const get_one_survey_answers = async (req, res) => {
         const { user_id, survey_id } = req.params; 
+        if (req.session && req.session.user_id) {
+            // 从 session 中提取 user_id
+            console.log("session:",req.session.user_id)
+        }
         try {
           const surveyAnswers = await getOneSurveyAnswers(user_id, survey_id);
       
