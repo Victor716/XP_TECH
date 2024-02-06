@@ -3,15 +3,16 @@ import { open } from 'sqlite';
 
 import sequelize from './models/db.js';
 import * as models from './models/index.js';
-import { questions_v1 } from './static_data/questions.js';
 import { addSurveyIfEmpty } from './DAOs/surveyDAO.js';
 import { importQuestionsIfEmpty } from './DAOs/questionDAO.js';
 import { setupAssociations } from './models/index.js';
 
+import { questions_v1 } from './static_data/questions.js';
+
 const { Database } = sqlite3;
 
-const default_survey_name = 'Demo Survey';
-const default_survey_description = 'This is a demo survey.';
+const default_survey_name =`default survey`
+const default_survey_description =  `default survey for every new user.`
 const default_list_of_question_IDs = [1, 2, 3, 4, 5]
 
 async function openUserDb() {
@@ -24,30 +25,17 @@ async function openUserDb() {
 async function initializeDatabase() {
   try {
     setupAssociations()
-    // await sequelize.sync({force: true});
-    await sequelize.sync(); // 创建或更新数据库表结构
-    console.log('Database initialized successfully.');
+    if (process.env.FORCE_REBOOT_DB === 'yes'){
+      await sequelize.sync({force: true})
+      console.log('Database force rebot successfully.');
+    }else{
+      await sequelize.sync({force: false});
+      console.log('Database initialized successfully.');
+    }
   } catch (error) {
     console.error('Failed to initialize database:', error);
   }
 }
-
-// async function importQuestionsIfEmpty(questions) {
-//   try {
-//     const count = await models.QuestionModel.count();
-//     if (count === 0){
-//       for (const description of questions) {
-//         await models.QuestionModel.create({
-//           question_discription: description,
-//           question_type: 'simple_choice'
-//         });
-//       }
-//     }
-//     console.log('All questions have been successfully imported.');
-//   } catch (error) {
-//     console.error('Failed to import questions:', error);
-//   }
-// }
 
 async function setup() {
   await initializeDatabase();

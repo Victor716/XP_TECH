@@ -58,7 +58,7 @@ async function getSurveyById(id){
         return questions;
     } catch (error) {
         console.error('Failed to fetch questions for survey from DB:', error);
-        return NaN;
+        return null;
     }
 }
 

@@ -1,15 +1,17 @@
 import express from "express";
 import session from 'express-session'
+import dotenv from 'dotenv'
 
 import AuthenticationController from "./controllers/users.js"
 import SurveyController from "./controllers/surveys.js";
 import AnswerController from "./controllers/answers.js";
 import database from "./database.js";
 
-
+dotenv.config();
 const app = express();
+
 app.use(session({
-  secret: 'your_secret_key', // 用于签名 session ID 的密钥，应该是一个随机字符串
+  secret: process.env.SESSION_SECRET,
   resave: false, // 强制保存 session 即使它没有变化
   saveUninitialized: false, // 强制将未初始化的 session 存储
   cookie: {
