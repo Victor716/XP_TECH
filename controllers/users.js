@@ -34,6 +34,40 @@ const AuthenticationController = (app) => {
     }
   }
 
+  const get_user_character = async(req, res) => {
+    if (!req.session || !req.session.user_id){
+      return res.status(401).json({ message: "Invalid credentials" });
+    } 
+    try{
+      fist_question = "Fisrt question that LLM is going to ask";
+      let finish = false
+      const previous_ans = req.body;
+      if (!previous_ans){
+        return res.json({ message: fist_question, finish});
+      }
+      else{
+        // send to llm
+        const llm_return = await call_LLM(previous_ans); // TODO:
+        if (llm_return.is_end){
+          finish = true
+          await UserModel.update({ user_character: llm_return },
+            { where: 
+              { user_id : req.session.user_id }
+            }
+          )
+          return res.json({ message: "character diagnose complete", finish})
+        }
+        return res.json({ message: llm_return, finish});
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async function call_LLM() {
+    //TODO
+  }
+  
   // request mapping paths
   app.post("/api/auth/sign_up", sign_up);
   app.post("/api/auth/sign_in", sign_in);

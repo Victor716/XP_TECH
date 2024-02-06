@@ -16,7 +16,7 @@ app.use(session({
   saveUninitialized: false, // 强制将未初始化的 session 存储
   cookie: {
     secure: false, // 在生产环境中应设置为 true
-    maxAge: 3600000 // 设置 cookie 过期时间为 1 小时
+    maxAge: 100*60*60 // 设置 cookie 过期时间为 1 小时
   }
 }));
 app.use(express.json({

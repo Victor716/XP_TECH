@@ -1,8 +1,9 @@
-import { Op } from 'sequelize';
+import { Op, or } from 'sequelize';
 
 import { pushAnswers, getOneSurveyAnswers } from "../DAOs/answerDAO.js"
 import { AnswerModel } from "../models/answer_model.js";
 import { getSurveyById } from "../DAOs/surveyDAO.js";
+import session from 'express-session';
 
 
 const answer_expired_month_length = 6;
@@ -10,9 +11,13 @@ const answer_expired_month_length = 6;
 const AnswerController = (app) => {
 
     const push_answers = async(req, res) =>{
-        // console.log("in push_ansers")
+        if (!req.session || !req.session.user_id){
+            return res.status(401).json({ message: "Invalid credentials" });
+        } 
+        console.log("in push_ansers")
         try{
-            const {user_id, survey_id, raw_answers } = req.body;
+            const { survey_id, raw_answers } = req.body;
+            const user_id = req.session.user_id
             const survey_questions = await getSurveyById(survey_id);
             const qsr_ids = survey_questions.map(question => question.Relation.qsr_id);
             const existingAnswers = await AnswerModel.findAll({
@@ -42,12 +47,13 @@ const AnswerController = (app) => {
         }
     }
 
-    const get_one_survey_answers = async (req, res) => {
-        const { user_id, survey_id } = req.params; 
-        if (req.session && req.session.user_id) {
-            // 从 session 中提取 user_id
-            console.log("session:",req.session.user_id)
-        }
+    const get_my_survey_answers = async (req, res) => {
+        if (!req.session || !req.session.user_id){
+            return res.status(401).json({ message: "Invalid credentials" });
+        } 
+        const survey_id  = req.body; 
+        const user_id = req.session.user_id;
+        
         try {
           const surveyAnswers = await getOneSurveyAnswers(user_id, survey_id);
       
@@ -62,8 +68,8 @@ const AnswerController = (app) => {
         }
       };
 
-    app.post('/api/add_survey_result', push_answers);
-    app.get('/survey/:user_id/:survey_id/answers', get_one_survey_answers);
+    app.post('/api/add_my_survey_result', push_answers);
+    app.get('/api/get_my_survey_answer', get_my_survey_answers);
 }
 
 
