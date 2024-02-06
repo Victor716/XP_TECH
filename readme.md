@@ -149,7 +149,7 @@ return：(每道原题 + 答案)
 
 ## survey：
 
-### app.get('/api/surveys/get_survey_by_id', get_survey_by_id) 获取某套原题，如果不提供survey_id, 则返回 survey_id == 1的 内置题（不需要session）
+### app.get('/api/get_survey_by_id', get_survey_by_id) 获取某套原题，如果不提供survey_id, 则返回 survey_id == 1的 内置题（不需要session）
 
 例：body
 ```json

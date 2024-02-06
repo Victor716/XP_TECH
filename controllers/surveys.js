@@ -23,7 +23,7 @@ const SurveyController = (app) => {
         }
     }
 
-    app.get('/api/surveys/get_survey_by_id', get_survey_by_id)
+    app.get('/api/get_survey_by_id', get_survey_by_id)
 
 }
 

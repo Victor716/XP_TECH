@@ -51,9 +51,9 @@ const AnswerController = (app) => {
         if (!req.session || !req.session.user_id){
             return res.status(401).json({ message: "Invalid credentials" });
         } 
-        const survey_id  = req.body; 
+        const survey_id  = req.body.survey_id; 
         const user_id = req.session.user_id;
-        
+        console.log(survey_id, user_id )
         try {
           const surveyAnswers = await getOneSurveyAnswers(user_id, survey_id);
       
