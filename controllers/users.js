@@ -12,6 +12,7 @@ const AuthenticationController = (app) => {
       await UserModel.create({user_id, wechat_id, first_name, last_name, birthday, org, student_id, grade });
       res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
+      console.log('error', error)
       res.status(500).json({ error: 'Failed to register user' });
     }
   }
