@@ -89,11 +89,28 @@ const AuthenticationController = (app) => {
     //TODO
   }
 
+  const getAuthToken = async (req, res) => {
+    try {
+      const appid = "wxb5503b722d9b9be6";
+      const secret = "20f6f0e3cd4cb7478ad996371d07efd7"
+      const url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appid}&secret=${secret}`;
+      const reponse = await axios.get(url);
+      const { data: { errcode, errmsg, session_key, openid } } = response;
+      if (!errcode) {
+        console.log(session_key, openid);
+        res.json({ message: "Get open data successfully", data: response.data });
+      } else {
+        res.status(401).json({ message: errmsg });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   // request mapping paths
   app.post("/api/auth/sign_up", sign_up);
   app.post("/api/auth/sign_in", sign_in);
   app.post("/api/auth/open_id", get_open_id);
-
 }
 
 
