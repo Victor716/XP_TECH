@@ -4,38 +4,33 @@ import sequelize from './db.js';
 
 const UserModel = sequelize.define('User', {
   user_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     primaryKey: true,
     // autoIncrement: true
   },
-  wechat_id: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
   first_name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   last_name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   birthday: {
     type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    allowNull: true
   },
   org: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: true
   },
   student_id: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   grade: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
     defaultValue: '大一'
   }
 }, {
