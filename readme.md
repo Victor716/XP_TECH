@@ -4,8 +4,10 @@
  - 在根目录下创建 .env, 加入：
 ```
 NODE_ENV = 'local_test'
-SESSION_SECRET = '' // 请设置一个密钥
+JWT_SECRET = '' // 请设置一个密钥
 FORCE_REBOOT_DB = 'no'
+APP_ID = 
+APP_SERECT =
 ```
  - npm start 运行服务器
 

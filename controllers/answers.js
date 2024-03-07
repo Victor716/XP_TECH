@@ -3,7 +3,6 @@ import { Op, or } from 'sequelize';
 import { pushAnswers, getOneSurveyAnswers } from "../DAOs/answerDAO.js"
 import { AnswerModel } from "../models/answer_model.js";
 import { getSurveyById } from "../DAOs/surveyDAO.js";
-import session from 'express-session';
 
 
 const answer_expired_month_length = 6;

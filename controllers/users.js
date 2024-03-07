@@ -1,9 +1,10 @@
 import axios from 'axios'
 import crypto from 'crypto'
+import jwt from 'jsonwebtoken'
 
 // import CircularJSON from "circular-json";
 import database from '../database.js'
-import { UserModel } from '../models/user_model.js';
+import { UserModel } from '../models/user_model.js'
 
 
 function hashUserId(text) {
@@ -54,20 +55,21 @@ const AuthenticationController = (app) => {
       if (!errcode) {
         const user_id = hashUserId(openid)
         const user = await UserModel.findOne({ where: { user_id } })
+        const token = jwt.sign({user_id: user_id}, process.env.JWT_SERET, { expiresIn: '1h' }); // 生成 JWT
         // 新用户， 加入表格
         if (user === null) {
           try {
             await UserModel.create({ user_id});
-            req.session.user_id = user_id;
-            res.status(201).json({ message: 'New user registered successfully',  is_new_user: true });
+            // req.session.user_id = user_id;
+            res.status(201).json({ message: 'New user registered successfully',  is_new_user: true, jwt: token });
           } catch (error) {
             res.status(500).json({ error: 'Failed to register user' });
           }
         } else {
-          req.session.user_id = user.user_id;
+          // req.session.user_id = user.user_id;
           // 老用户， 返回 user_info
           const {user_id, ...user_data } = user.toJSON();
-          res.status(200).json({ message: "Signed in successfully", is_new_user: false, user_data: user_data })
+          res.status(200).json({ message: "Signed in successfully", is_new_user: false, user_data: user_data, jwt: token })
         }
       } else {
         res.status(401).json({ message: errmsg });
@@ -79,37 +81,61 @@ const AuthenticationController = (app) => {
 
   // 更新用户信息
   const update_user_info = async (req, res) => {
-    const { user_id, first_name, last_name, birthday, org, student_id, grade } = req.body;
+    if (!req.session || !req.session.user_id) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
     try {
-      const user = await UserModel.findByPk(user_id);
+      const {first_name, last_name, birthday, org, student_id, grade } = req.body;
+      const user = await UserModel.findByPk(req.session.user_id);
   
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
   
       await UserModel.update({ first_name, last_name, birthday, org, student_id, grade }, {
-        where: { user_id: user_id }
+        where: { user_id: req.session.user_id }
       });
   
-      res.status(200).json({ message: 'User information updated successfully' });
+      return res.status(200).json({ message: 'User information updated successfully' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Failed to update user information' });
+      return res.status(500).json({ error: 'Failed to update user information' });
     }
   };
+
+  const get_user_info = async (req, res) => {
+    {
+      if (!req.session || !req.session.user_id) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      try {
+        const user = await UserModel.findByPk(req.session.user_id);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        const {user_id, ...user_data } = user.toJSON();
+        return res.status(200).json({ message: 'User info:', user_data: user_data });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message});
+      }
+    };
+  }
 
   const get_user_character = async (req, res) => {
     if (!req.session || !req.session.user_id) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     try {
-      fist_question = "Fisrt question that LLM is going to ask";
-      let finish = false
-      const previous_ans = req.body;
-      if (!previous_ans) {
-        return res.json({ message: fist_question, finish });
+      const user = await UserModel.findOne({ where: { user_id } })
+      if (user.user_character){
+        return res.json({ message: 'previous_character_found', user_character: user.user_character });
       }
-      else {
+      else{
+        let finish = false
+        // 首次和LLM的通信会传递 user_id： user_id
+        const { answers: previous_ans = { user_id: req.session.user_id } } = req.body;
+        console.log(previous_ans); 
         // send to llm
         const llm_return = await call_LLM(previous_ans); // TODO:
         if (llm_return.is_end) {
@@ -122,7 +148,7 @@ const AuthenticationController = (app) => {
           )
           return res.json({ message: "character diagnose complete", finish })
         }
-        return res.json({ message: llm_return, finish });
+        return res.json({ message: "continue diagnosing", question: llm_return, finish });
       }
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -137,8 +163,10 @@ const AuthenticationController = (app) => {
   // request mapping paths
   // app.post("/api/auth/sign_up", sign_up);
   // app.post("/api/auth/sign_in", sign_in);
+  
   app.post("/api/auth/open_id", get_open_id);
   app.patch("/api/auth/update_user_info", update_user_info);
+  app.post("/api/auth/get_user_info", get_user_info);
   
 }
 
