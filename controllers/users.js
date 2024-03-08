@@ -11,36 +11,23 @@ function hashUserId(text) {
   return crypto.createHash('sha256').update(text).digest('hex');
 }
 
-const AuthenticationController = (app) => {
-//   //sign up
-//   const sign_up = async (req, res) => {
-//     const { user_id, first_name, last_name, birthday, org, student_id, grade } = req.body;
-//     // console.log(user_id, first_name, last_name, birthday, org, student_id, grade);
-//     try {
-//       await UserModel.update({ user_id, first_name, last_name, birthday, org, student_id, grade });
-//       res.status(200).json({ message: 'User registered successfully' });
-//     } catch (error) {
-//       res.status(500).json({ error: 'Failed to register user' });
-//     }
-//   }
+const verifyJWT = (token) => {
+  return new Promise((resolve, reject) => {
+    if (!token) {
+      reject(new Error('Missing JWT'));
+    } else {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(decoded.user_id); // 假设 JWT 中存储的用户 ID 字段名为 user_id
+        }
+      });
+    }
+  });
+};
 
-//   //sign in
-//   const sign_in = async (req, res) => {
-//     try {
-//       const { user_id } = req.body;
-//       const user = await UserModel.findOne({ where: { user_id } });
-//       if (user) {
-//         // 在 session 中保存用户信息
-//         req.session.user_id = user.user_id;
-//         // req.session.wechat_id = user.wechat_id;
-//         res.json({ message: "Signed in successfully", user });
-//       } else {
-//         res.status(401).json({ message: "Invalid credentials" });
-//       }
-//     } catch (error) {
-//       res.status(500).json({ error: error.message });
-//     }
-//   }
+const AuthenticationController = (app) => {
 
   const get_open_id = async (req, res) => {
     try {
@@ -55,18 +42,16 @@ const AuthenticationController = (app) => {
       if (!errcode) {
         const user_id = hashUserId(openid)
         const user = await UserModel.findOne({ where: { user_id } })
-        const token = jwt.sign({user_id: user_id}, process.env.JWT_SERET, { expiresIn: '1h' }); // 生成 JWT
+        const token = jwt.sign({user_id: user_id}, process.env.JWT_SECRET, { expiresIn: '1h' }); // 生成 JWT
         // 新用户， 加入表格
         if (user === null) {
           try {
             await UserModel.create({ user_id});
-            // req.session.user_id = user_id;
             res.status(201).json({ message: 'New user registered successfully',  is_new_user: true, jwt: token });
           } catch (error) {
             res.status(500).json({ error: 'Failed to register user' });
           }
         } else {
-          // req.session.user_id = user.user_id;
           // 老用户， 返回 user_info
           const {user_id, ...user_data } = user.toJSON();
           res.status(200).json({ message: "Signed in successfully", is_new_user: false, user_data: user_data, jwt: token })
@@ -81,45 +66,40 @@ const AuthenticationController = (app) => {
 
   // 更新用户信息
   const update_user_info = async (req, res) => {
-    if (!req.session || !req.session.user_id) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
     try {
-      const {first_name, last_name, birthday, org, student_id, grade } = req.body;
-      const user = await UserModel.findByPk(req.session.user_id);
+      const user_id = await verifyJWT(req.body.jwt);
+      const {name, gender, school, grade, student_id, major } = req.body;
+      const user = await UserModel.findByPk(user_id);
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      const [affectedCount, affectedRows] = await UserModel.update({ name, gender, school, grade, student_id, major }, {
+        where: { user_id: user_id }
+      });
+  
+      return res.status(200).json({ message: `Updated successfully: count: ${affectedCount}`, jwt: req.body.jwt });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  };
+
+  const get_user_info = async (req, res) => {
+    try {
+      const user_id = await verifyJWT(req.body.jwt);
+      const user = await UserModel.findByPk(user_id);
   
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
   
-      await UserModel.update({ first_name, last_name, birthday, org, student_id, grade }, {
-        where: { user_id: req.session.user_id }
-      });
-  
-      return res.status(200).json({ message: 'User information updated successfully' });
+      const { user_id: id, ...user_data } = user.toJSON();
+      return res.status(200).json({ message: 'User info:', user_data, jwt: req.body.jwt });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Failed to update user information' });
+      // console.error(error);
+      return res.status(500).json({ error: error.message });
     }
-  };
-
-  const get_user_info = async (req, res) => {
-    {
-      if (!req.session || !req.session.user_id) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      try {
-        const user = await UserModel.findByPk(req.session.user_id);
-        if (!user) {
-          return res.status(404).json({ message: 'User not found' });
-        }
-        const {user_id, ...user_data } = user.toJSON();
-        return res.status(200).json({ message: 'User info:', user_data: user_data });
-      } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: error.message});
-      }
-    };
   }
 
   const get_user_character = async (req, res) => {

@@ -34,7 +34,7 @@ return：
 ```json
 {"message":"User registered successfully"}
 ```
-### app.post("/api/auth/sign_in", sign_in); 登陆，获取session cookie
+### app.post("/api/auth/sign_in", sign_in); 登陆，
 
 例：body
 ```json

@@ -6,32 +6,34 @@ const UserModel = sequelize.define('User', {
   user_id: {
     type: DataTypes.STRING,
     primaryKey: true,
-    // autoIncrement: true
   },
-  first_name: {
+  name: {
     type: DataTypes.STRING,
     allowNull: true
   },
-  last_name: {
+  gender: {
     type: DataTypes.STRING,
     allowNull: true
   },
-  birthday: {
-    type: DataTypes.DATE,
+  school: {
+    type: DataTypes.STRING,
     allowNull: true
   },
-  org: {
-    type: DataTypes.TEXT,
+  grade: {
+    type: DataTypes.STRING,
     allowNull: true
   },
   student_id: {
     type: DataTypes.STRING,
     allowNull: true
   },
-  grade: {
+  major: {
     type: DataTypes.STRING,
     allowNull: true,
-    defaultValue: '大一'
+  },
+  character: {
+    type: DataTypes.STRING,
+    allowNull: true,
   }
 }, {
   tableName: 'users',
