@@ -1,5 +1,4 @@
 import { UserModel } from "./user_model.js";
-import { SymptomModel } from "./symptom_model.js";
 import { OptionModel } from "./option_model.js";
 import { QuestionModel } from "./question_model.js";
 import { QuestionSurveyRelationModel} from "./question_survey_relation_model.js"
@@ -27,5 +26,5 @@ const setupAssociations = () => {
     // console.log("association setup complete")
 }
 
-export {OptionModel, SymptomModel, QuestionModel, QuestionSurveyRelationModel,
+export {OptionModel, QuestionModel, QuestionSurveyRelationModel,
 UserModel, SurveyModel, AnswerModel, setupAssociations}
