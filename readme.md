@@ -4,8 +4,10 @@
  - 在根目录下创建 .env, 加入：
 ```
 NODE_ENV = 'local_test'
-SESSION_SECRET = '' // 请设置一个密钥
-FORCE_REBOOT_DB = 'no'
+JWT_SECRET = '' // 请设置一个密钥
+FORCE_REBOOT_DB = 'no' // 需要删库重建时(如改变了数据col)，设置为‘yes’
+APP_ID = 
+APP_SERECT =
 ```
  - npm start 运行服务器
 
@@ -13,52 +15,6 @@ FORCE_REBOOT_DB = 'no'
 
 ## user：
 
-### app.post("/api/auth/sign_up", sign_up); 注册 用户个人信息
-
-例：body
-```json
-{
-  "user_id": "12345",
-  "wechat_id": "qwert",
-  "first_name": "John3",
-  "last_name": "Doe3",
-  "birthday": "1993-12-01",
-  "org": "North Carolina State University",
-  "student_id": "1234567",
-  "grade": "大二"
-}
-```
-return：
-```json
-{"message":"User registered successfully"}
-```
-### app.post("/api/auth/sign_in", sign_in); 登陆，获取session cookie
-
-例：body
-```json
-{
-  {
-  "user_id": 12345
-}
-}
-```
-return：
-```json
-{
-    "message": "Signed in successfully",
-    "user": {
-        "user_id": 12345,
-        "wechat_id": "qwert",
-        "first_name": "John3",
-        "last_name": "Doe3",
-        "birthday": "1993-12-01T00:00:00.000Z",
-        "org": "North Carolina State University",
-        "student_id": "1234567",
-        "grade": "大二"
-    }
-}
-```
-## answers：
 
 ### app.post('/api/add_my_survey_result', push_answers) 记录该用户对某套survey的答案（需要session）。
 

@@ -1,5 +1,4 @@
 import express from "express";
-import session from 'express-session'
 import dotenv from 'dotenv'
 import bodyParser from 'body-parser';
 
@@ -13,15 +12,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false, // 强制保存 session 即使它没有变化
-  saveUninitialized: false, // 强制将未初始化的 session 存储
-  cookie: {
-    secure: false, // 在生产环境中应设置为 true
-    maxAge: 100 * 60 * 60 // 设置 cookie 过期时间为 1 小时
-  }
-}));
 app.use(express.json({
   limit: '50mb'
 }));
