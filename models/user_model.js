@@ -4,39 +4,36 @@ import sequelize from './db.js';
 
 const UserModel = sequelize.define('User', {
   user_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     primaryKey: true,
-    // autoIncrement: true
   },
-  wechat_id: {
+  name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
-  first_name: {
+  gender: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
-  last_name: {
+  school: {
     type: DataTypes.STRING,
-    allowNull: false
-  },
-  birthday: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-  },
-  org: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  student_id: {
-    type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   grade: {
     type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: '大一'
+    allowNull: true
+  },
+  student_id: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  major: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  character: {
+    type: DataTypes.STRING,
+    allowNull: true,
   }
 }, {
   tableName: 'users',
