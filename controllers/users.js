@@ -43,11 +43,13 @@ const AuthenticationController = (app) => {
         const user_id = hashUserId(openid)
         const user = await UserModel.findOne({ where: { user_id } })
         const token = jwt.sign({user_id: user_id}, process.env.JWT_SECRET, { expiresIn: '1h' }); // 生成 JWT
+        
         // 新用户， 加入表格
         if (user === null) {
           try {
             await UserModel.create({ user_id});
             res.status(201).json({ message: 'New user registered successfully',  is_new_user: true, jwt: token });
+            console.log("get_open_id: new user")
           } catch (error) {
             res.status(500).json({ error: 'Failed to register user' });
           }
@@ -55,6 +57,7 @@ const AuthenticationController = (app) => {
           // 老用户， 返回 user_info
           const {user_id, ...user_data } = user.toJSON();
           res.status(200).json({ message: "Signed in successfully", is_new_user: false, user_data: user_data, jwt: token })
+          console.log("get_open_id: old user")
         }
       } else {
         res.status(401).json({ message: errmsg });
